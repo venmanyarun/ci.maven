@@ -67,9 +67,9 @@ public abstract class InstallFeatureSupport extends ServerFeatureSupport {
     public static final String FEATURES_JSON_ARTIFACT_ID = "features";
 
     protected class InstallFeatureMojoUtil extends InstallFeatureUtil {
-        public InstallFeatureMojoUtil(Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName, List<String> additionalJsons, Collection<Map<String,String>> keyMap)
+        public InstallFeatureMojoUtil(Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName, List<String> additionalJsons, Collection<Map<String,String>> keyMap,  Map<String, String> environmentVariables)
                 throws PluginScenarioException, PluginExecutionException {
-            super(installDirectory, new File(project.getBuild().getDirectory()), features.getFrom(), features.getTo(), pluginListedEsas, propertiesList, openLibertyVerion, containerName, additionalJsons, features.getVerify(), keyMap);
+            super(installDirectory, new File(project.getBuild().getDirectory()), features.getFrom(), features.getTo(), pluginListedEsas, propertiesList, openLibertyVerion, containerName, additionalJsons, features.getVerify(), keyMap, environmentVariables);
             setContainerEngine(this);
         }
 
@@ -252,7 +252,11 @@ public abstract class InstallFeatureSupport extends ServerFeatureSupport {
     private void createNewInstallFeatureUtil(Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName, List<String> additionalJsons, Collection<Map<String,String>> keyMap) 
             throws PluginExecutionException {
         try {
-            util = new InstallFeatureMojoUtil(pluginListedEsas, propertiesList, openLibertyVerion, containerName, additionalJsons, keyMap);
+            Map<String, String> envVars = getToolchainEnvVar();
+            if (envVars != null && !envVars.isEmpty() && envVars.containsKey("JAVA_HOME")) {
+                getLog().info("Passing toolchain JAVA_HOME to InstallFeatureUtil: " + envVars.get("JAVA_HOME"));
+            }
+            util = new InstallFeatureMojoUtil(pluginListedEsas, propertiesList, openLibertyVerion, containerName, additionalJsons, keyMap, envVars);
         } catch (PluginScenarioException e) {
             getLog().debug(e.getMessage());
             if (noFeaturesSection) {

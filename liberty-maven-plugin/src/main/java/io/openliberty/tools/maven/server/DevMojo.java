@@ -370,6 +370,7 @@ public class DevMojo extends LooseAppSupport {
         Set<String> existingPlatforms;
         Map<String, File> libertyDirPropertyFiles = new HashMap<String, File>();
         List<MavenProject> upstreamMavenProjects;
+        private final File serverOutputDirectory;
 
         public DevMojoUtil(File installDir, File userDir, File serverDirectory, File sourceDirectory,
                            File testSourceDirectory, File configDirectory, File projectDirectory, File multiModuleProjectDirectory,
@@ -385,6 +386,7 @@ public class DevMojo extends LooseAppSupport {
                     keepTempContainerfile, mavenCacheLocation, upstreamProjects, recompileDeps, project.getPackaging(),
                     pom, parentPoms, generateFeatures, generateToSrc, compileArtifactPaths, testArtifactPaths, webResourceDirs, compileMojoError);
 
+            this.serverOutputDirectory = serverOutputDirectory;
             this.libertyDirPropertyFiles = LibertyPropFilesUtility.getLibertyDirectoryPropertyFiles(new CommonLogger(getLog()), installDir, userDir,
                     serverDirectory, serverOutputDirectory);
             ServerFeatureUtil servUtil = getServerFeatureUtil(true, libertyDirPropertyFiles);  
@@ -535,6 +537,11 @@ public class DevMojo extends LooseAppSupport {
             } catch (Exception e) {
                 getLog().warn(MessageFormat.format(messages.getString("warn.server.stopped"), serverName));
             }
+        }
+
+        @Override
+        protected File getServerOutputDirectory() {
+            return serverOutputDirectory;
         }
 
         @Override
